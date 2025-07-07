@@ -45,3 +45,10 @@ docker-run: docker-build
 	@echo "Running Orchestrator Docker container..."
 	docker run --rm -p 8080:8080 --name orchestrator-container decentralized-ai-orchestrator-orchestrator
 	@echo "To stop: docker stop orchestrator-container"
+
+.PHONY: setup-env
+# Setup .env file from .env.example
+setup-env:
+	@echo "Setting up .env file from .env.example..."
+	cp .env.example .env
+	@echo ".env file created. Please edit it with your local configurations."
