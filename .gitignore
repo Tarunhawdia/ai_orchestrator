@@ -1,0 +1,33 @@
+# Binaries for programs and plugins
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Test binary, generated with `go test -c`
+*.test
+
+# Output of the go generate command
+*.pb.go
+
+# IDEs and editors
+.idea/
+.vscode/
+*.swp
+*.bak
+*~
+.DS_Store
+
+# Go build outputs
+/bin/
+/pkg/
+
+# Dependency directories
+vendor/
+
+# Environment variables (if you ever add a .env file)
+.env
+
+# Docker specific
+*.log
