@@ -81,7 +81,7 @@ func main() {
 		agents.NewOneShotAgent(
 			llm,
 			agentTools,
-			agents.WithMaxIterations(3), 
+			agents.WithMaxIterations(3),
 		),
 	)
 	if err != nil {
@@ -90,7 +90,7 @@ func main() {
 
 	// 4. Define the agent's input (the question that might require a tool)
 	agentInput := map[string]any{
-		"input": "What is the current state of AI agent development according to recent news?",
+		"input": "what are gender?",
 	}
 
 	// 5. Run the agent
@@ -103,7 +103,7 @@ func main() {
 	// 6. Print the agent's final answer
 	fmt.Println("\n--- Agent's Final Answer ---")
 	fmt.Printf("Agent Output: %s\n", agentResponse["output"])
-	fmt.Println("---------------------------\n")
+	fmt.Println("---------------------------")
 	// --- End Agent and Tool Integration ---
 
 	// Simple HTTP handler
