@@ -32,7 +32,7 @@ Follow these steps to get the project up and running on your local machine.
 1.  **Clone the Repository:**
 
     ```bash
-    git clone [https://github.com/your-username/decentralized-ai-orchestrator.git](https://github.com/your-username/decentralized-ai-orchestrator.git)
+    git clone [https://github.com/Tarunhawdia/decentralized-ai-orchestrator.git](git@github.com:Tarunhawdia/ai_orchestrator.git)
     cd decentralized-ai-orchestrator
     ```
 
@@ -77,10 +77,8 @@ Follow these steps to get the project up and running on your local machine.
 6.  **Clean Up:**
     Removes compiled binaries.
     `bash
-make clean
-`
-    _(Note: `go.mod` and `go.sum` will initially be in the root, but as services grow, you might consider multi-module setup or keep a single module in the root and reference sub-packages.)_
-
+    make clean
+    `
 ## Contribution Guidelines
 
 We welcome contributions! Please refer to the `CONTRIBUTING.md` (to be created) for detailed guidelines. In the meantime:
