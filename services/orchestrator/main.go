@@ -7,9 +7,12 @@ import (
 	"net/http"
 	"os"
 
+	localtools "github.com/Tarunhawdia/decentralized-ai-orchestrator/services/orchestrator/tools"
 	"github.com/joho/godotenv"
+	"github.com/tmc/langchaingo/agents"
 	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/llms/googleai"
+	"github.com/tmc/langchaingo/tools"
 )
 
 func main() {
@@ -63,6 +66,45 @@ func main() {
 
 	log.Printf("LLM Response: %s", llmResponse)
 	// --- End LLM Integration ---
+
+	// --- Agent and Tool Integration ---
+	// 1. Create an instance of your custom SearchTool
+	mySearchTool := localtools.NewSearchTool()
+
+	// 2. Define the tools available to the agent
+	agentTools := []tools.Tool{mySearchTool}
+
+	// 3. Create an agent executor
+	// We'll use a ZeroShotAgent for simplicity, which decides what to do based on the prompt.
+	// The prompt needs to clearly instruct the LLM on tool usage.
+	agentExecutor := agents.NewExecutor(
+		agents.NewOneShotAgent(
+			llm,
+			agentTools,
+			agents.WithMaxIterations(3), 
+		),
+	)
+	if err != nil {
+		log.Fatalf("Failed to create agent executor: %v", err)
+	}
+
+	// 4. Define the agent's input (the question that might require a tool)
+	agentInput := map[string]any{
+		"input": "What is the current state of AI agent development according to recent news?",
+	}
+
+	// 5. Run the agent
+	log.Println("\n--- Running Agent ---")
+	agentResponse, err := agentExecutor.Call(ctx, agentInput)
+	if err != nil {
+		log.Fatalf("Agent execution failed: %v", err)
+	}
+
+	// 6. Print the agent's final answer
+	fmt.Println("\n--- Agent's Final Answer ---")
+	fmt.Printf("Agent Output: %s\n", agentResponse["output"])
+	fmt.Println("---------------------------\n")
+	// --- End Agent and Tool Integration ---
 
 	// Simple HTTP handler
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
