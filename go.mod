@@ -3,6 +3,7 @@ module github.com/Tarunhawdia/decentralized-ai-orchestrator
 go 1.24.3
 
 require (
+	github.com/google/uuid v1.6.0
 	github.com/joho/godotenv v1.5.1
 	github.com/tmc/langchaingo v0.1.13
 )
@@ -29,7 +30,6 @@ require (
 	github.com/golang/protobuf v1.5.4 // indirect
 	github.com/google/generative-ai-go v0.15.1 // indirect
 	github.com/google/s2a-go v0.1.7 // indirect
-	github.com/google/uuid v1.6.0 // indirect
 	github.com/googleapis/enterprise-certificate-proxy v0.3.2 // indirect
 	github.com/googleapis/gax-go/v2 v2.12.4 // indirect
 	github.com/goph/emperror v0.17.2 // indirect

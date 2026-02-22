@@ -7,23 +7,17 @@ import (
 	"net/http"
 	"os"
 
-	localtools "github.com/Tarunhawdia/decentralized-ai-orchestrator/services/orchestrator/tools"
+	"github.com/Tarunhawdia/decentralized-ai-orchestrator/services/orchestrator/agent"
+	"github.com/Tarunhawdia/decentralized-ai-orchestrator/services/orchestrator/api"
+	"github.com/Tarunhawdia/decentralized-ai-orchestrator/services/orchestrator/storage"
 	"github.com/joho/godotenv"
-	"github.com/tmc/langchaingo/agents"
-	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/llms/googleai"
-	"github.com/tmc/langchaingo/tools"
 )
 
 func main() {
 	// Load environment variables from .env file if it exists.
-	// godotenv.Load() will look for a .env file in the current directory.
-	// It's fine if the file doesn't exist (e.g., in a production container),
-	// as os.Getenv will then fall back to actual environment variables.
 	err := godotenv.Load()
 	if err != nil {
-		// Log a non-fatal error if .env file is not found,
-		// as it might be expected in containerized environments.
 		log.Println("No .env file found, relying on environment variables or defaults.")
 	}
 
@@ -39,9 +33,6 @@ func main() {
 		geminiModelName = "gemini-pro"
 	}
 
-	//context for the LLM call
-	// This context is used for the LLM call and can be extended with timeouts or
-	// cancellation if needed in the future.
 	ctx := context.Background()
 
 	llm, err := googleai.New(
@@ -56,59 +47,21 @@ func main() {
 
 	log.Printf("Successfully initialized Google Gemini LLM with model: %s", geminiModelName)
 
-	// prompt for the llm
-	prompt := "what is the capital of india?"
+	// Initialize components
+	store := storage.NewInMemoryStore()
+	runner := agent.NewRunner(llm)
+	handlers := api.NewHandlers(store, runner)
 
-	llmResponse, err := llms.GenerateFromSinglePrompt(ctx, llm, prompt)
-	if err != nil {
-		log.Fatal(err)
-	}
+	// Setup routes
+	http.HandleFunc("/tasks", handlers.HandleSubmitTask) // POST
+	http.HandleFunc("/tasks/", handlers.HandleGetTask)   // GET
 
-	log.Printf("LLM Response: %s", llmResponse)
-	// --- End LLM Integration ---
-
-	// --- Agent and Tool Integration ---
-	// 1. Create an instance of your custom SearchTool
-	mySearchTool := localtools.NewSearchTool()
-
-	// 2. Define the tools available to the agent
-	agentTools := []tools.Tool{mySearchTool}
-
-	// 3. Create an agent executor
-	// We'll use a ZeroShotAgent for simplicity, which decides what to do based on the prompt.
-	// The prompt needs to clearly instruct the LLM on tool usage.
-	agentExecutor := agents.NewExecutor(
-		agents.NewOneShotAgent(
-			llm,
-			agentTools,
-			agents.WithMaxIterations(3),
-		),
-	)
-	if err != nil {
-		log.Fatalf("Failed to create agent executor: %v", err)
-	}
-
-	// 4. Define the agent's input (the question that might require a tool)
-	agentInput := map[string]any{
-		"input": "what are gender?",
-	}
-
-	// 5. Run the agent
-	log.Println("\n--- Running Agent ---")
-	agentResponse, err := agentExecutor.Call(ctx, agentInput)
-	if err != nil {
-		log.Fatalf("Agent execution failed: %v", err)
-	}
-
-	// 6. Print the agent's final answer
-	fmt.Println("\n--- Agent's Final Answer ---")
-	fmt.Printf("Agent Output: %s\n", agentResponse["output"])
-	fmt.Println("---------------------------")
-	// --- End Agent and Tool Integration ---
-
-	// Simple HTTP handler
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprintf(w, "Hello from the Orchestrator Service!")
+		if r.URL.Path != "/" {
+			http.NotFound(w, r)
+			return
+		}
+		fmt.Fprintf(w, "Hello from the Orchestrator Service! Use /tasks to submit work.")
 	})
 
 	// Determine the port to listen on from environment variable or default
@@ -118,7 +71,6 @@ func main() {
 	}
 
 	log.Printf("Orchestrator Service starting on port %s...", port)
-	// Start the HTTP server
 	if err := http.ListenAndServe(":"+port, nil); err != nil {
 		log.Fatalf("Orchestrator Service failed to start: %v", err)
 	}
